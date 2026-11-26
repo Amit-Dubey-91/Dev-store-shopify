@@ -280,6 +280,12 @@
     }
   },
   "sections": {
+    "metaobject_page_builder": {
+      "empty_blocks": "Select one or more Page Block entries in the section settings to display content.",
+      "empty_products": "No products are currently selected for this block.",
+      "empty_faq": "No FAQ items are currently available for this block.",
+      "unknown_layout": "Unsupported layout type: {{ layout_type }}."
+    },
     "announcements": {
       "previous_announcement": "Previous announcement",
       "next_announcement": "Next announcement",

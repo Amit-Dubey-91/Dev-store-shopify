@@ -1,0 +1,58 @@
+{%- doc -%}
+  Renders an FAQ Accordion layout block from a `page_block` metaobject entry.
+
+  @param {metaobject} block - The `page_block` metaobject entry.
+  @param {string} [section_id] - The parent section ID.
+{%- enddoc -%}
+
+{%- liquid
+  assign heading = block.heading.value
+  assign faq_items = block.faq.value
+  assign block_uid = block.system.id | default: 'faq'
+-%}
+
+<div class="mpb-block mpb-faq">
+  {%- if heading != blank -%}
+    <h2 class="mpb-block__heading h2">{{ heading | escape }}</h2>
+  {%- endif -%}
+
+  {%- if faq_items != blank -%}
+    <div class="mpb-faq__list">
+      {%- for faq_item in faq_items -%}
+        {%- liquid
+          assign question = faq_item.question.value
+          assign answer = faq_item.answer
+        -%}
+        {%- if question != blank -%}
+          <div class="accordion mpb-faq__accordion">
+            <details
+              id="Details-{{ section_id }}-{{ block_uid }}-{{ forloop.index }}"
+              class="mpb-faq__details"
+            >
+              <summary
+                id="Summary-{{ section_id }}-{{ block_uid }}-{{ forloop.index }}"
+                class="mpb-faq__summary"
+              >
+                <span class="summary__title mpb-faq__question h4">{{ question | escape }}</span>
+                {{- 'icon-caret.svg' | inline_asset_content -}}
+              </summary>
+              <div
+                id="CollapsibleAccordion-{{ section_id }}-{{ block_uid }}-{{ forloop.index }}"
+                class="accordion__content rte mpb-faq__answer"
+                role="region"
+                aria-labelledby="Summary-{{ section_id }}-{{ block_uid }}-{{ forloop.index }}"
+              >
+                {%- if answer != blank -%}
+                  {{ answer | metafield_tag }}
+                {%- endif -%}
+              </div>
+            </details>
+          </div>
+        {%- endif -%}
+      {%- endfor -%}
+    </div>
+  {%- else -%}
+    <p class="mpb-empty-state">{{ 'sections.metaobject_page_builder.empty_faq' | t }}</p>
+  {%- endif -%}
+</div>
+

@@ -1,0 +1,71 @@
+{%- doc -%}
+  Renders a Hero layout block from a `page_block` metaobject entry.
+
+  @param {metaobject} block - The `page_block` metaobject entry.
+  @param {string} [section_id] - The parent section ID.
+  @param {boolean} [is_first] - Whether this is the first block in the section.
+{%- enddoc -%}
+
+{%- liquid
+  assign heading = block.heading.value
+  assign text = block.text
+  assign image = block.image.value
+  assign cta_label = block.cta_label.value
+  assign cta_url = block.cta_url.value
+  assign has_cta = false
+  if cta_label != blank and cta_url != blank
+    assign has_cta = true
+  endif
+  assign has_content = false
+  if heading != blank or text != blank or has_cta
+    assign has_content = true
+  endif
+-%}
+
+{%- if image != blank or has_content -%}
+  <div class="mpb-block mpb-hero{% if image == blank %} mpb-hero--no-image{% endif %}">
+    {%- if image != blank -%}
+      {%- liquid
+        assign image_alt = image.alt | default: heading | default: '' | escape
+        assign fetch_priority = 'auto'
+        assign loading_strategy = 'lazy'
+        if is_first
+          assign fetch_priority = 'high'
+          assign loading_strategy = 'eager'
+        endif
+      -%}
+      <div class="mpb-hero__media">
+        {{
+          image
+          | image_url: width: 2000
+          | image_tag:
+            widths: '375, 550, 750, 1100, 1500, 2000',
+            sizes: '(min-width: 1200px) 1200px, 100vw',
+            alt: image_alt,
+            loading: loading_strategy,
+            fetchpriority: fetch_priority,
+            class: 'mpb-hero__image'
+        }}
+      </div>
+    {%- endif -%}
+
+    {%- if has_content -%}
+      <div class="mpb-hero__content">
+        {%- if heading != blank -%}
+          <h2 class="mpb-hero__heading h1">{{ heading | escape }}</h2>
+        {%- endif -%}
+        {%- if text != blank -%}
+          <div class="mpb-hero__text rte">{{ text | metafield_tag }}</div>
+        {%- endif -%}
+        {%- if has_cta -%}
+          <div class="mpb-hero__actions">
+            <a href="{{ cta_url }}" class="button button--primary mpb-hero__cta">
+              {{ cta_label | escape }}
+            </a>
+          </div>
+        {%- endif -%}
+      </div>
+    {%- endif -%}
+  </div>
+{%- endif -%}
+

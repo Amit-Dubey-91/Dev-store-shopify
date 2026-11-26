@@ -1,0 +1,43 @@
+{%- doc -%}
+  Renders a Product Grid layout block from a `page_block` metaobject entry.
+
+  @param {metaobject} block - The `page_block` metaobject entry.
+  @param {string} [section_id] - The parent section ID.
+{%- enddoc -%}
+
+{%- liquid
+  assign heading = block.heading.value
+  assign products = block.products.value
+-%}
+
+<div class="mpb-block mpb-grid">
+  {%- if heading != blank -%}
+    <h2 class="mpb-block__heading h2">{{ heading | escape }}</h2>
+  {%- endif -%}
+
+  {%- if products != blank -%}
+    <ul
+      class="mpb-grid__list grid product-grid grid--2-col-tablet-down grid--4-col-desktop contains-card contains-card--product{% if settings.card_style == 'standard' %} contains-card--standard{% endif %}"
+      role="list"
+    >
+      {%- for product in products -%}
+        <li class="grid__item mpb-grid__item">
+          {% render 'card-product',
+            card_product: product,
+            media_aspect_ratio: 'portrait',
+            extend_height: true,
+            show_secondary_image: false,
+            show_vendor: false,
+            show_rating: false,
+            section_id: section_id,
+            quick_add: 'none',
+            skip_styles: true
+          %}
+        </li>
+      {%- endfor -%}
+    </ul>
+  {%- else -%}
+    <p class="mpb-empty-state">{{ 'sections.metaobject_page_builder.empty_products' | t }}</p>
+  {%- endif -%}
+</div>
+

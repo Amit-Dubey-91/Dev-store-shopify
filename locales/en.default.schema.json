@@ -384,6 +384,18 @@
     }
   },
   "sections": {
+    "metaobject_page_builder": {
+      "name": "Metaobject page builder",
+      "settings": {
+        "page_blocks": {
+          "label": "Page blocks",
+          "info": "Select, reorder, or remove Page Block metaobject entries."
+        }
+      },
+      "presets": {
+        "name": "Metaobject page builder"
+      }
+    },
     "all": {
       "animation": {
         "content": "Animations",

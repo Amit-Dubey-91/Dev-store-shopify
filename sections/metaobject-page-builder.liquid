@@ -1,0 +1,115 @@
+{{ 'component-card.css' | asset_url | stylesheet_tag }}
+{{ 'component-price.css' | asset_url | stylesheet_tag }}
+{{ 'component-accordion.css' | asset_url | stylesheet_tag }}
+{{ 'metaobject-page-builder.css' | asset_url | stylesheet_tag }}
+
+<script src="{{ 'metaobject-page-builder.js' | asset_url }}" defer="defer"></script>
+
+{%- style -%}
+  .section-{{ section.id }}-padding {
+    padding-top: {{ section.settings.padding_top | times: 0.75 | round: 0 }}px;
+    padding-bottom: {{ section.settings.padding_bottom | times: 0.75 | round: 0 }}px;
+  }
+
+  @media screen and (min-width: 750px) {
+    .section-{{ section.id }}-padding {
+      padding-top: {{ section.settings.padding_top }}px;
+      padding-bottom: {{ section.settings.padding_bottom }}px;
+    }
+  }
+{%- endstyle -%}
+
+{%- liquid
+  assign page_blocks = section.settings.page_blocks
+-%}
+
+<metaobject-page-builder
+  class="metaobject-page-builder color-{{ section.settings.color_scheme }} gradient section-{{ section.id }}-padding"
+  data-section-id="{{ section.id }}"
+>
+  <div class="page-width">
+    {%- if page_blocks != blank -%}
+      <div class="metaobject-page-builder__blocks">
+        {%- for block in page_blocks -%}
+          {%- assign layout_type = block.layout_type.value | strip | downcase -%}
+          {%- case layout_type -%}
+            {%- when 'hero' -%}
+              {% render 'page-block-hero', block: block, section_id: section.id, is_first: forloop.first %}
+            {%- when 'two_column' -%}
+              {% render 'page-block-two-column', block: block, section_id: section.id %}
+            {%- when 'grid' -%}
+              {% render 'page-block-grid', block: block, section_id: section.id %}
+            {%- when 'faq' -%}
+              {% render 'page-block-faq', block: block, section_id: section.id %}
+            {%- else -%}
+              {%- if request.design_mode -%}
+                <div class="mpb-notice" role="status">
+                  {{ 'sections.metaobject_page_builder.unknown_layout' | t: layout_type: layout_type }}
+                </div>
+              {%- endif -%}
+          {%- endcase -%}
+        {%- endfor -%}
+      </div>
+    {%- elsif request.design_mode -%}
+      <div class="mpb-notice" role="status">
+        {{ 'sections.metaobject_page_builder.empty_blocks' | t }}
+      </div>
+    {%- endif -%}
+  </div>
+</metaobject-page-builder>
+
+{% schema %}
+{
+  "name": "t:sections.metaobject_page_builder.name",
+  "tag": "section",
+  "class": "section",
+  "disabled_on": {
+    "groups": ["header", "footer"]
+  },
+  "settings": [
+    {
+      "type": "metaobject_list",
+      "id": "page_blocks",
+      "label": "t:sections.metaobject_page_builder.settings.page_blocks.label",
+      "info": "t:sections.metaobject_page_builder.settings.page_blocks.info",
+      "metaobject_type": "page_block"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "t:sections.all.colors.label",
+      "default": "scheme-1"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.all.padding.section_padding_heading"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "t:sections.all.padding.padding_top",
+      "default": 36
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "t:sections.all.padding.padding_bottom",
+      "default": 36
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:sections.metaobject_page_builder.presets.name"
+    }
+  ]
+}
+{% endschema %}
+

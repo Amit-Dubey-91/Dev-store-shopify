@@ -1,0 +1,231 @@
+/* Scoped styles for the Metaobject Page Builder section */
+.metaobject-page-builder {
+  display: block;
+  overflow-x: clip;
+}
+
+.metaobject-page-builder__blocks {
+  display: flex;
+  flex-direction: column;
+  gap: 4rem;
+}
+
+@media screen and (min-width: 750px) {
+  .metaobject-page-builder__blocks {
+    gap: 5.6rem;
+  }
+}
+
+.metaobject-page-builder .mpb-block__heading {
+  margin: 0 0 2.4rem;
+}
+
+.metaobject-page-builder .mpb-notice,
+.metaobject-page-builder .mpb-empty-state {
+  padding: 2rem;
+  border: 0.1rem solid rgba(var(--color-foreground), 0.16);
+  border-radius: var(--text-boxes-radius, 0.4rem);
+  color: rgba(var(--color-foreground), 0.8);
+  text-align: center;
+  margin: 0;
+}
+
+/* Focus indicators */
+.metaobject-page-builder a:focus-visible,
+.metaobject-page-builder summary:focus-visible {
+  outline: 0.2rem solid rgba(var(--color-foreground), 0.75);
+  outline-offset: 0.2rem;
+}
+
+/* Hero layout */
+.metaobject-page-builder .mpb-hero {
+  position: relative;
+  display: grid;
+  align-items: center;
+  border-radius: var(--media-radius, 0);
+  overflow: hidden;
+  background-color: rgba(var(--color-foreground), 0.04);
+}
+
+.metaobject-page-builder .mpb-hero__media {
+  position: relative;
+  width: 100%;
+  min-height: 28rem;
+  max-height: 54rem;
+  overflow: hidden;
+}
+
+.metaobject-page-builder .mpb-hero__media::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.55) 0%,
+    rgba(0, 0, 0, 0.25) 60%,
+    rgba(0, 0, 0, 0.15) 100%
+  );
+  pointer-events: none;
+}
+
+.metaobject-page-builder .mpb-hero__image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: 28rem;
+  max-height: 54rem;
+  object-fit: cover;
+}
+
+.metaobject-page-builder .mpb-hero__content {
+  position: relative;
+  z-index: 1;
+  padding: 2.8rem 2rem;
+  text-align: center;
+}
+
+.metaobject-page-builder .mpb-hero:not(.mpb-hero--no-image) .mpb-hero__media,
+.metaobject-page-builder .mpb-hero:not(.mpb-hero--no-image) .mpb-hero__content {
+  grid-area: 1 / 1;
+}
+
+.metaobject-page-builder .mpb-hero:not(.mpb-hero--no-image) .mpb-hero__content {
+  color: #ffffff;
+}
+
+.metaobject-page-builder .mpb-hero:not(.mpb-hero--no-image) .mpb-hero__heading {
+  color: #ffffff;
+}
+
+.metaobject-page-builder .mpb-hero--no-image .mpb-hero__content {
+  padding: 4rem 2.4rem;
+}
+
+.metaobject-page-builder .mpb-hero__heading {
+  margin: 0 0 1.2rem;
+}
+
+.metaobject-page-builder .mpb-hero__text {
+  max-width: 64rem;
+  margin: 0 auto 2rem;
+}
+
+.metaobject-page-builder .mpb-hero__text > :last-child {
+  margin-bottom: 0;
+}
+
+.metaobject-page-builder .mpb-hero__actions {
+  margin-top: 2rem;
+}
+
+@media screen and (min-width: 750px) {
+  .metaobject-page-builder .mpb-hero__media,
+  .metaobject-page-builder .mpb-hero__image {
+    min-height: 40rem;
+  }
+
+  .metaobject-page-builder .mpb-hero__content {
+    padding: 4.8rem 4rem;
+  }
+}
+
+/* Two-column layout */
+.metaobject-page-builder .mpb-two-column__grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2.4rem;
+  align-items: center;
+}
+
+@media screen and (min-width: 750px) {
+  .metaobject-page-builder .mpb-two-column__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 4rem;
+  }
+
+  .metaobject-page-builder .mpb-two-column__grid--single {
+    grid-template-columns: 1fr;
+  }
+}
+
+.metaobject-page-builder .mpb-two-column__media {
+  overflow: hidden;
+  border-radius: var(--media-radius, 0);
+}
+
+.metaobject-page-builder .mpb-two-column__image {
+  display: block;
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+}
+
+.metaobject-page-builder .mpb-two-column__heading {
+  margin: 0 0 1.6rem;
+}
+
+.metaobject-page-builder .mpb-two-column__text > :last-child {
+  margin-bottom: 0;
+}
+
+.metaobject-page-builder .mpb-two-column__actions {
+  margin-top: 2.4rem;
+}
+
+/* Product grid layout */
+.metaobject-page-builder .mpb-grid__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.metaobject-page-builder .mpb-grid__item product-component {
+  display: block;
+  height: 100%;
+}
+
+.metaobject-page-builder .mpb-grid__item .card__media .media {
+  background-color: rgba(var(--color-foreground), 0.03);
+}
+
+.metaobject-page-builder .mpb-grid__item .card__media .media > img {
+  object-fit: contain;
+}
+
+/* FAQ accordion layout */
+.metaobject-page-builder .mpb-faq__list {
+  max-width: 84rem;
+}
+
+.metaobject-page-builder .mpb-faq__accordion {
+  margin-top: 0;
+}
+
+.metaobject-page-builder .mpb-faq__summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.6rem;
+  cursor: pointer;
+  list-style: none;
+}
+
+.metaobject-page-builder .mpb-faq__summary::-webkit-details-marker {
+  display: none;
+}
+
+.metaobject-page-builder .mpb-faq__question {
+  margin: 0;
+}
+
+.metaobject-page-builder .mpb-faq__summary .icon-caret {
+  flex-shrink: 0;
+  width: 1.2rem;
+  height: 1.2rem;
+  transition: transform 0.2s ease;
+}
+
+.metaobject-page-builder .mpb-faq__details[open] > .mpb-faq__summary .icon-caret {
+  transform: rotate(180deg);
+}
+

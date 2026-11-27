@@ -280,6 +280,24 @@
     }
   },
   "sections": {
+    "bundle_builder": {
+      "title": "Build Your 3-Item Bundle",
+      "subtitle": "Select 3 distinct products from the collection below.",
+      "select_product": "Add to bundle",
+      "selected_product": "Selected",
+      "remove_product": "Remove {{ title }} from bundle",
+      "sold_out": "Sold out",
+      "variant_label": "Select variant for {{ title }}",
+      "slots_progress": "{{ count }} of {{ max }} selected",
+      "empty_slot": "Slot {{ number }}",
+      "total_label": "Bundle total",
+      "add_bundle": "Add Bundle to Cart",
+      "adding_bundle": "Adding bundle...",
+      "bundle_added": "Your 3-item bundle was added to the cart.",
+      "bundle_error": "Could not add bundle to cart. Please try again.",
+      "select_three_error": "Please select 3 distinct products before adding to cart.",
+      "empty_collection": "No products found. Choose a collection in the section settings."
+    },
     "announcements": {
       "previous_announcement": "Previous announcement",
       "next_announcement": "Next announcement",

@@ -1,0 +1,306 @@
+{{ 'component-card.css' | asset_url | stylesheet_tag }}
+{{ 'component-price.css' | asset_url | stylesheet_tag }}
+{{ 'bundle-builder.css' | asset_url | stylesheet_tag }}
+
+<script src="{{ 'bundle-builder.js' | asset_url }}" defer="defer"></script>
+
+{%- style -%}
+  .section-{{ section.id }}-padding {
+    padding-top: {{ section.settings.padding_top | times: 0.75 | round: 0 }}px;
+    padding-bottom: {{ section.settings.padding_bottom | times: 0.75 | round: 0 }}px;
+  }
+
+  @media screen and (min-width: 750px) {
+    .section-{{ section.id }}-padding {
+      padding-top: {{ section.settings.padding_top }}px;
+      padding-bottom: {{ section.settings.padding_bottom }}px;
+    }
+  }
+{%- endstyle -%}
+
+{%- liquid
+  assign max_items = 3
+  assign collection = section.settings.collection
+  assign columns_desktop_int = section.settings.columns_desktop | plus: 0
+  assign columns_mobile_int = section.settings.columns_mobile | plus: 0
+  assign max_columns_to_show = columns_mobile_int
+  if columns_desktop_int > columns_mobile_int
+    assign max_columns_to_show = columns_desktop_int
+  endif
+-%}
+
+{%- capture bundle_strings -%}
+  {
+    "selectProduct": {{ 'sections.bundle_builder.select_product' | t | json }},
+    "selectedProduct": {{ 'sections.bundle_builder.selected_product' | t | json }},
+    "removeProduct": {{ 'sections.bundle_builder.remove_product' | t: title: '[title]' | json }},
+    "soldOut": {{ 'sections.bundle_builder.sold_out' | t | json }},
+    "slotsProgress": {{ 'sections.bundle_builder.slots_progress' | t: count: '[count]', max: '[max]' | json }},
+    "emptySlot": {{ 'sections.bundle_builder.empty_slot' | t: number: '[number]' | json }},
+    "addBundle": {{ 'sections.bundle_builder.add_bundle' | t | json }},
+    "addingBundle": {{ 'sections.bundle_builder.adding_bundle' | t | json }},
+    "bundleAdded": {{ 'sections.bundle_builder.bundle_added' | t | json }},
+    "bundleError": {{ 'sections.bundle_builder.bundle_error' | t | json }},
+    "selectThreeError": {{ 'sections.bundle_builder.select_three_error' | t | json }}
+  }
+{%- endcapture -%}
+
+<div class="color-{{ section.settings.color_scheme }} isolate gradient">
+  <bundle-builder
+    id="BundleBuilder-{{ section.id }}"
+    class="bundle-builder section-{{ section.id }}-padding page-width"
+    data-section-id="{{ section.id }}"
+    data-max-items="{{ max_items }}"
+    data-currency-iso="{{ cart.currency.iso_code }}"
+    data-locale="{{ request.locale.iso_code }}"
+    data-cart-add-url="{{ routes.cart_add_url }}.js"
+    data-strings="{{ bundle_strings | strip_newlines | escape }}"
+  >
+    <div class="bundle-builder__header title-wrapper title-wrapper--no-top-margin">
+      {%- if section.settings.title != blank -%}
+        <h2 class="title inline-richtext {{ section.settings.heading_size }}">
+          {{ section.settings.title }}
+        </h2>
+      {%- endif -%}
+      {%- if section.settings.description != blank -%}
+        <div class="bundle-builder__description rte">
+          {{ section.settings.description }}
+        </div>
+      {%- endif -%}
+    </div>
+
+    <div class="bundle-builder__layout">
+      <div class="bundle-builder__grid-wrapper">
+        {%- if collection != blank and collection.products.size > 0 -%}
+          <ul
+            class="grid product-grid contains-card contains-card--product{% if settings.card_style == 'standard' %} contains-card--standard{% endif %} grid--{{ section.settings.columns_desktop }}-col-desktop grid--{{ section.settings.columns_mobile }}-col-tablet-down"
+            role="list"
+          >
+            {%- assign lazy_load = false -%}
+            {%- for product in collection.products limit: section.settings.products_to_show -%}
+              {%- if lazy_load == false and forloop.index > max_columns_to_show -%}
+                {%- assign lazy_load = true -%}
+              {%- endif -%}
+              <li class="grid__item">
+                {% render 'bundle-builder-card',
+                  product: product,
+                  section_id: section.id,
+                  lazy_load: lazy_load,
+                  media_aspect_ratio: section.settings.image_ratio,
+                  show_vendor: section.settings.show_vendor
+                %}
+              </li>
+            {%- endfor -%}
+          </ul>
+        {%- else -%}
+          <div class="bundle-builder__empty center">
+            <p>{{ 'sections.bundle_builder.empty_collection' | t }}</p>
+          </div>
+        {%- endif -%}
+      </div>
+
+      <aside class="bundle-builder__summary" aria-label="{{ 'sections.bundle_builder.total_label' | t }}">
+        <div class="bundle-builder__summary-inner color-{{ section.settings.summary_color_scheme }} gradient">
+          <div class="bundle-builder__summary-header">
+            <h3 class="h4 bundle-builder__summary-title">
+              {{ 'sections.bundle_builder.title' | t }}
+            </h3>
+            <span class="bundle-builder__progress caption-with-letter-spacing" data-bundle-progress>
+              {{ 'sections.bundle_builder.slots_progress' | t: count: 0, max: max_items }}
+            </span>
+          </div>
+
+          <ol class="bundle-builder__slots list-unstyled" data-bundle-slots>
+            {%- for i in (1..max_items) -%}
+              <li class="bundle-builder__slot bundle-builder__slot--empty">
+                <span class="bundle-builder__slot-placeholder">
+                  {{ 'sections.bundle_builder.empty_slot' | t: number: i }}
+                </span>
+              </li>
+            {%- endfor -%}
+          </ol>
+
+          <div class="bundle-builder__summary-footer">
+            <div class="bundle-builder__total-row">
+              <span class="bundle-builder__total-label">{{ 'sections.bundle_builder.total_label' | t }}</span>
+              <span class="bundle-builder__total-value price" data-bundle-total>
+                {{ 0 | money }}
+              </span>
+            </div>
+
+            <div
+              class="bundle-builder__status"
+              role="status"
+              aria-live="polite"
+              data-bundle-status
+              hidden
+            ></div>
+
+            <button
+              type="button"
+              class="button button--primary button--full-width bundle-builder__submit"
+              data-bundle-submit
+              disabled
+              aria-disabled="true"
+            >
+              <span data-bundle-submit-label>{{ 'sections.bundle_builder.add_bundle' | t }}</span>
+              {%- render 'loading-spinner' -%}
+            </button>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </bundle-builder>
+</div>
+
+{% schema %}
+{
+  "name": "Bundle Builder",
+  "tag": "section",
+  "class": "section",
+  "disabled_on": {
+    "groups": ["header", "footer"]
+  },
+  "settings": [
+    {
+      "type": "inline_richtext",
+      "id": "title",
+      "default": "Build Your 3-Item Bundle",
+      "label": "Heading"
+    },
+    {
+      "type": "select",
+      "id": "heading_size",
+      "options": [
+        {
+          "value": "h2",
+          "label": "t:sections.all.heading_size.options__1.label"
+        },
+        {
+          "value": "h1",
+          "label": "t:sections.all.heading_size.options__2.label"
+        },
+        {
+          "value": "h0",
+          "label": "t:sections.all.heading_size.options__3.label"
+        }
+      ],
+      "default": "h1",
+      "label": "t:sections.all.heading_size.label"
+    },
+    {
+      "type": "richtext",
+      "id": "description",
+      "default": "<p>Pick any 3 distinct products from the collection and add them to your cart in one click.</p>",
+      "label": "Description"
+    },
+    {
+      "type": "collection",
+      "id": "collection",
+      "label": "Collection"
+    },
+    {
+      "type": "range",
+      "id": "products_to_show",
+      "min": 3,
+      "max": 24,
+      "step": 1,
+      "default": 12,
+      "label": "Maximum products to show"
+    },
+    {
+      "type": "range",
+      "id": "columns_desktop",
+      "min": 2,
+      "max": 4,
+      "step": 1,
+      "default": 3,
+      "label": "Desktop columns"
+    },
+    {
+      "type": "select",
+      "id": "columns_mobile",
+      "default": "2",
+      "label": "Mobile columns",
+      "options": [
+        {
+          "value": "1",
+          "label": "1 column"
+        },
+        {
+          "value": "2",
+          "label": "2 columns"
+        }
+      ]
+    },
+    {
+      "type": "select",
+      "id": "image_ratio",
+      "options": [
+        {
+          "value": "adapt",
+          "label": "t:sections.featured-collection.settings.image_ratio.options__1.label"
+        },
+        {
+          "value": "portrait",
+          "label": "t:sections.featured-collection.settings.image_ratio.options__2.label"
+        },
+        {
+          "value": "square",
+          "label": "t:sections.featured-collection.settings.image_ratio.options__3.label"
+        }
+      ],
+      "default": "square",
+      "label": "t:sections.featured-collection.settings.image_ratio.label"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_vendor",
+      "default": false,
+      "label": "t:sections.featured-collection.settings.show_vendor.label"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "t:sections.all.colors.label",
+      "default": "scheme-1"
+    },
+    {
+      "type": "color_scheme",
+      "id": "summary_color_scheme",
+      "label": "Summary bar color scheme",
+      "default": "scheme-2"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.all.padding.section_padding_heading"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "t:sections.all.padding.padding_top",
+      "default": 36
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "t:sections.all.padding.padding_bottom",
+      "default": 36
+    }
+  ],
+  "presets": [
+    {
+      "name": "Bundle Builder"
+    }
+  ]
+}
+{% endschema %}
+

@@ -1,0 +1,170 @@
+{% doc %}
+  Renders a product card for the Bundle Builder section.
+
+  @param {product} product - The product to display.
+  @param {string} section_id - The parent section ID.
+  @param {boolean} [lazy_load] - Whether to lazy-load the product image. Defaults to `true`.
+  @param {string} [media_aspect_ratio] - Image aspect ratio (`adapt`, `portrait`, `square`). Defaults to `square`.
+  @param {boolean} [show_vendor] - Whether to display the product vendor. Defaults to `false`.
+{% enddoc %}
+
+{%- liquid
+  assign selected_variant = product.selected_or_first_available_variant
+  assign is_available = selected_variant.available | default: false
+  assign has_variants = false
+  if product.has_only_default_variant == false
+    assign has_variants = true
+  endif
+
+  assign ratio = 1
+  if product.featured_media and media_aspect_ratio == 'portrait'
+    assign ratio = 0.8
+  elsif product.featured_media and media_aspect_ratio == 'adapt'
+    assign ratio = product.featured_media.aspect_ratio
+  endif
+  if ratio == 0 or ratio == null
+    assign ratio = 1
+  endif
+-%}
+
+<article
+  class="bundle-card card-wrapper product-card-wrapper{% unless is_available %} bundle-card--sold-out{% endunless %}"
+  data-bundle-card
+  data-product-id="{{ product.id }}"
+  data-product-title="{{ product.title | escape }}"
+  data-variant-id="{{ selected_variant.id }}"
+  data-variant-title="{% if has_variants %}{{ selected_variant.title | escape }}{% endif %}"
+  data-has-variants="{{ has_variants }}"
+  data-price="{{ selected_variant.price | default: 0 }}"
+  data-available="{{ is_available }}"
+  data-image="{% if product.featured_media %}{{ product.featured_media | image_url: width: 160 }}{% endif %}"
+>
+  <div class="card card--{{ settings.card_style }}{% if product.featured_media %} card--media{% else %} card--text{% endif %}{% if settings.card_style == 'card' %} color-{{ settings.card_color_scheme }} gradient{% endif %}">
+    <div
+      class="card__inner {% if settings.card_style == 'standard' %}color-{{ settings.card_color_scheme }} gradient{% endif %} ratio"
+      style="--ratio-percent: {{ 1 | divided_by: ratio | times: 100 }}%;"
+    >
+      {%- if product.featured_media -%}
+        <div class="card__media">
+          <div class="media media--transparent media--hover-effect">
+            <img
+              srcset="
+                {%- if product.featured_media.width >= 165 -%}{{ product.featured_media | image_url: width: 165 }} 165w,{%- endif -%}
+                {%- if product.featured_media.width >= 360 -%}{{ product.featured_media | image_url: width: 360 }} 360w,{%- endif -%}
+                {%- if product.featured_media.width >= 533 -%}{{ product.featured_media | image_url: width: 533 }} 533w,{%- endif -%}
+                {{ product.featured_media | image_url }} {{ product.featured_media.width }}w
+              "
+              src="{{ product.featured_media | image_url: width: 533 }}"
+              sizes="(min-width: 990px) calc((100vw - 130px) / 4), (min-width: 750px) calc((100vw - 120px) / 3), calc((100vw - 35px) / 2)"
+              alt="{{ product.featured_media.alt | default: product.title | escape }}"
+              class="motion-reduce"
+              {% unless lazy_load == false %}
+                loading="lazy"
+              {% endunless %}
+              width="{{ product.featured_media.width }}"
+              height="{{ product.featured_media.height }}"
+            >
+          </div>
+        </div>
+      {%- endif -%}
+
+      {%- unless is_available -%}
+        <div class="card__content">
+          <div class="card__badge {{ settings.badge_position }}">
+            <span class="badge badge--bottom-left color-{{ settings.sold_out_badge_color_scheme }}">
+              {{ 'products.product.sold_out' | t }}
+            </span>
+          </div>
+        </div>
+      {%- endunless -%}
+    </div>
+
+    <div class="card__content bundle-card__body">
+      <div class="card__information">
+        <h3 class="card__heading h5">
+          <a href="{{ product.url }}" class="full-unstyled-link">
+            {{ product.title | escape }}
+          </a>
+        </h3>
+
+        <div class="card-information">
+          {%- if show_vendor -%}
+            <span class="visually-hidden">{{ 'accessibility.vendor' | t }}</span>
+            <div class="caption-with-letter-spacing light">{{ product.vendor }}</div>
+          {%- endif -%}
+
+          <div class="bundle-card__price price" data-bundle-card-price>
+            <span class="price-item price-item--regular">
+              {{ selected_variant.price | money }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="bundle-card__controls">
+        {%- if has_variants -%}
+          <div class="bundle-card__variant-wrapper">
+            <label
+              class="visually-hidden"
+              for="BundleVariant-{{ section_id }}-{{ product.id }}"
+            >
+              {{ 'sections.bundle_builder.variant_label' | t: title: product.title | escape }}
+            </label>
+            <div class="select">
+              <select
+                id="BundleVariant-{{ section_id }}-{{ product.id }}"
+                class="select__select bundle-card__variant-select"
+                data-bundle-variant-select
+                {% unless product.available %}
+                  disabled
+                {% endunless %}
+              >
+                {%- for variant in product.variants -%}
+                  <option
+                    value="{{ variant.id }}"
+                    data-price="{{ variant.price }}"
+                    data-formatted-price="{{ variant.price | money | escape }}"
+                    data-available="{{ variant.available }}"
+                    data-variant-title="{{ variant.title | escape }}"
+                    {% if variant.id == selected_variant.id %}
+                      selected
+                    {% endif %}
+                    {% unless variant.available %}
+                      disabled
+                    {% endunless %}
+                  >
+                    {{ variant.title | escape }} - {{ variant.price | money }}
+                    {%- unless variant.available %} ({{ 'products.product.sold_out' | t }}){%- endunless -%}
+                  </option>
+                {%- endfor -%}
+              </select>
+              <span class="svg-wrapper">
+                {{- 'icon-caret.svg' | inline_asset_content -}}
+              </span>
+            </div>
+          </div>
+        {%- endif -%}
+
+        <button
+          type="button"
+          class="button button--full-width button--secondary bundle-card__select-btn"
+          data-bundle-select-btn
+          aria-pressed="false"
+          {% unless is_available %}
+            disabled
+            aria-disabled="true"
+          {% endunless %}
+        >
+          <span data-bundle-btn-label>
+            {%- if is_available -%}
+              {{ 'sections.bundle_builder.select_product' | t }}
+            {%- else -%}
+              {{ 'sections.bundle_builder.sold_out' | t }}
+            {%- endif -%}
+          </span>
+        </button>
+      </div>
+    </div>
+  </div>
+</article>
+
